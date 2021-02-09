@@ -35,7 +35,7 @@ center=function(var,group) {
   return(var-tapply(var,group,mean,na.rm=T)[group])
 }
 
-randomSims=function(myDataTest,myDataControl,randomSeed,numSims=1000){
+randomSims=function(myDataTest,myDataControl,randomSeed,numSims=100){
   #set.seed(783881)
   set.seed(randomSeed)
   dataOfSims=data.frame(matrix(ncol=8,nrow=numSims))
@@ -56,8 +56,8 @@ randomSims=function(myDataTest,myDataControl,randomSeed,numSims=1000){
     randomGroupData=getReactionTimeDataset(rbind(treatmentGroup,controlGroup))
     randomGroupData$timeCovariate=center(randomGroupData$time,randomGroupData$block)
     #analysis without time
-    mNoTime=lmer(reactionTime~deg*block*group+deg*correctSide+MRexperience+(deg+block|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-    mNoTime2=lmer(reactionTime~deg*block*group+deg*correctSide+MRexperience-block:group+(deg+block|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+    mNoTime=lmer(reactionTime~deg*block*group+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+    mNoTime2=lmer(reactionTime~deg*block*group+deg*correctSide+MRexperience-block:group+(deg+time|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
     pNoTime=anova(mNoTime,mNoTime2)[[8]][2]
     coefNoTime=coef(summary(mNoTime))[9]
     if(!isSingular(mNoTime) & !isSingular(mNoTime2)){ #retry in case of singular fit

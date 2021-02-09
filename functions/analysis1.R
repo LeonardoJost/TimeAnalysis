@@ -20,6 +20,12 @@ source("functions/helpers.R")
 
 #load dataset
 dataset.rt=datasetA1
+#get random slopes
+mBaseTime=lmer(reactionTime~deg*time*block+deg*correctSide+MRexperience+(deg*time*block|ID)+(deg|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+
+
+#load dataset
+dataset.rt=datasetA1
 ## analysis without time
 mBase=lmer(reactionTime~deg*block+deg*correctSide+MRexperience+(deg+block|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 mBase.summary=modelSummary(mBase,0)
