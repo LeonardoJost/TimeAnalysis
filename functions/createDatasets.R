@@ -17,24 +17,17 @@
 ### functions
 source("functions/helpers.R")
 source("functions/generateGraphsAndTables.R", encoding="utf-8")
-getReactionTimeDataset=function(myData, acc=FALSE){
-  datasetForLMM=myData
+getReactionTimeDataset=function(myData){
   #scaling
-  datasetForLMM$deg=datasetForLMM$deg/100
-  datasetForLMM$endTime=datasetForLMM$endTime/30 #30 minutes (time is already in minutes)
-  #prepare dataset
-  dataset.noOutlier=datasetForLMM[which(!datasetForLMM$outlier),]
-  dataset.rt=dataset.noOutlier[which(dataset.noOutlier$typeOutlier=="hit"),]
-  dataset.rt$deg=dataset.rt$deg-mean(dataset.rt$deg) #center degree
-  dataset.noOutlier$deg=dataset.noOutlier$deg-mean(dataset.noOutlier$deg) #center degree
+  myData$deg=myData$deg/100
+  myData$time=myData$time/30 #30 minutes (time is already in minutes)
+  #center degree
+  myData$deg=myData$deg-mean(myData$deg) 
   #normalizing time and centering degree are necessary to analyze main effects of partial interaction (block*group) when higher-
   #order interactions are present (deg*block*group+time*block*group). Main effects are calculated for value 0
   #0 of degree: average effect due to centering (this is "standard" main effect of removing higher order interaction)
   #0 of time: difference between blocks
-  if(acc)
-    return(dataset.noOutlier)
-  else
-    return(dataset.rt)
+  return(myData)
 }
 ##create output directories, if they don't exist (outputs warnings otherwise)
 dir.create("figs")
@@ -49,11 +42,15 @@ dir.create("figs/MR/accData/")
 ### main script
 #load full dataset
 myData=read.csv(file="data\\dataset.csv",sep=";")
+myData$time=myData$endTime
+#reaction time dataset
+myData=myData[which(!myData$outlier),]
+myData=myData[which(myData$typeOutlier=="hit"),]
 #split block by time of 10 minutes
 myData$block=toChar(myData$block)
-myData$block=ifelse(myData$endTime>10*60*1000,ifelse(myData$endTime>20*60*1000,"main3","main2"),"main1")
+myData$block=ifelse(myData$time>10*60*1000,ifelse(myData$time>20*60*1000,"main3","main2"),"main1")
 #normalize time to minutes
-myData$endTime=myData$endTime/60000 
+myData$time=myData$time/60000
 
 ### analysis 1
 #all blocks
@@ -61,15 +58,15 @@ datasetA1=getReactionTimeDataset(myData)
 
 #generate some plots of the separation by blocks
 myData$cond=ifelse(myData$block=="main3","20-30min",ifelse(myData$block=="main2","10-20min","0-10min"))
-generateTableAndGraphsForCondition(myData,"block",TRUE,TRUE,legendProp=list(color="Block",linetypes="Block",shape="Block"))
+generateTableAndGraphsForCondition(myData,"block",FALSE,TRUE,legendProp=list(color="Block",linetypes="Block",shape="Block"))
 
 #normalize time 0 to end of first block
-myData$endTime=myData$endTime-10
+myData$time=myData$time-10
 
 ### analysis 2
 #blocks 1 and 3 but move block 3 in time to block 2
 myData13=myData[which(myData$block!="main2"),]
-myData13$endTime[which(myData13$block=="main3")]=myData13$endTime[which(myData13$block=="main3")]-10
+myData13$time[which(myData13$block=="main3")]=myData13$time[which(myData13$block=="main3")]-10
 datasetA2=getReactionTimeDataset(myData13)
 
 ### analysis 3-5

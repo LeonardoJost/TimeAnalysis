@@ -1,5 +1,5 @@
 ### generate graph and table output
-#     Copyright (C) 2019  Leonardo Jost
+#     Copyright (C) 2021  Leonardo Jost
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -98,7 +98,7 @@ generateLineGraphsByTime=function(dataset,title,legendProp=list(),ylab="Reaction
     legendProp$pos=c(0.8,0.8)
   library(ggplot2)
   #plot data as line graph (mean Data by degree and condition)
-  ggplot(dataset,aes(y=reactionTime,x=endTime, color=condColor, linetype=condLinetype)) + 
+  ggplot(dataset,aes(y=reactionTime,x=time, color=condColor, linetype=condLinetype)) + 
     geom_smooth(aes(fill=condColor, group=cond)) +
     labs(x="time(min)",y=ylab,color=legendProp$color,fill=legendProp$color,linetype=legendProp$linetype,shape=legendProp$shape) + 
     theme_classic() + theme(legend.position = legendProp$pos) + 
@@ -107,7 +107,7 @@ generateLineGraphsByTime=function(dataset,title,legendProp=list(),ylab="Reaction
     scale_fill_discrete(drop=TRUE,limits = levels(dataset$condColor))
   ggsave(paste("figs/",title,"LinePlotByCondTime.png",sep=""))
   #plot again with linear smoothing
-  ggplot(dataset,aes(y=reactionTime,x=endTime, color=condColor, linetype=condLinetype)) + 
+  ggplot(dataset,aes(y=reactionTime,x=time, color=condColor, linetype=condLinetype)) + 
     geom_smooth(aes(fill=condColor, group=cond),method="lm") +
     labs(x="time(min)",y=ylab,color=legendProp$color,fill=legendProp$color,linetype=legendProp$linetype,shape=legendProp$shape) + 
     theme_classic() + theme(legend.position = legendProp$pos) + 

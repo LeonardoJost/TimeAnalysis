@@ -1,5 +1,5 @@
 ### Analysis of a treatment and between-groups differences in pretest performance (better group as treatment)
-#     Copyright (C) 2019  Leonardo Jost
+#     Copyright (C) 2021  Leonardo Jost
 # 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -32,65 +32,65 @@ mBase3.summary=modelSummary(mBase3,0)
 #all effects significant
 
 ## analysis with time
-mBaseTime=lmer(reactionTime~deg*endTime*block*group+deg*correctSide+MRexperience+(deg+endTime|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+mBaseTime=lmer(reactionTime~deg*time*block*group+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 mBaseTime.summary=modelSummary(mBaseTime,0)
 #stepwise remove nonsignificant effects
-mTime2=lmer(reactionTime~endTime*block*group+deg*block*group+deg*endTime*group+deg*endTime*block+deg*correctSide+MRexperience+(deg+endTime|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+mTime2=lmer(reactionTime~time*block*group+deg*block*group+deg*time*group+deg*time*block+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 mTime2.summary=modelSummary(mTime2,0)
 #split deg*time*block
-mTime3=lmer(reactionTime~endTime*block*group+deg*block*group+deg*endTime*group+deg*correctSide+MRexperience+(deg+endTime|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+mTime3=lmer(reactionTime~time*block*group+deg*block*group+deg*time*group+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 mTime3.summary=modelSummary(mTime3,0)
 #split deg*group*block
-mTime4=lmer(reactionTime~endTime*block*group+deg*block+deg*endTime*group+
-              deg*correctSide+MRexperience+(deg+endTime|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+mTime4=lmer(reactionTime~time*block*group+deg*block+deg*time*group+
+              deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 mTime4.summary=modelSummary(mTime4,0)
 #split deg*block
-mTime5=lmer(reactionTime~endTime*block*group+deg*endTime*group+
-              deg*correctSide+MRexperience+(deg+endTime|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+mTime5=lmer(reactionTime~time*block*group+deg*time*group+
+              deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 mTime5.summary=modelSummary(mTime5,0)
 #split deg*time*group
-mTime6=lmer(reactionTime~endTime*block*group+deg*group+deg*endTime+
-              deg*correctSide+MRexperience+(deg+endTime|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+mTime6=lmer(reactionTime~time*block*group+deg*group+deg*time+
+              deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 mTime6.summary=modelSummary(mTime6,0)
 #all effects significant
 
 #nonsignificant effects
 #deg*group*time
-mTimeDegXGroupXTime=lmer(reactionTime~endTime*block*group+deg*endTime*group+
-              deg*correctSide+MRexperience+(deg+endTime|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+mTimeDegXGroupXTime=lmer(reactionTime~time*block*group+deg*time*group+
+              deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 mTimeDegXGroupXTime.summary=modelSummary(mTimeDegXGroupXTime,0)
 #deg*block*time
-mTimeDegXBlockXTime=lmer(reactionTime~endTime*block*group+deg*endTime*block+
-                           deg*correctSide+MRexperience+(deg+endTime|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+mTimeDegXBlockXTime=lmer(reactionTime~time*block*group+deg*time*block+
+                           deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 mTimeDegXBlockXTime.summary=modelSummary(mTimeDegXBlockXTime,0)
 #deg*block*group
-mTimeDegXBlockXGroup=lmer(reactionTime~endTime*block*group+deg*group*block+
-                           deg*correctSide+MRexperience+(deg+endTime|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+mTimeDegXBlockXGroup=lmer(reactionTime~time*block*group+deg*group*block+
+                           deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 mTimeDegXBlockXGroup.summary=modelSummary(mTimeDegXBlockXGroup,0)
 
 #main effects of two-way-interactions
 #block*group
-mTime7=lmer(reactionTime~endTime*block*group+deg*group+deg*endTime-block:group+
-              deg*correctSide+MRexperience+(deg+endTime|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+mTime7=lmer(reactionTime~time*block*group+deg*group+deg*time-block:group+
+              deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 anova(mTime7,mTime6)
 
 ## separate groups
 #control group
 dataset.rt=datasetA4a[which(datasetA4a$group=="control"),]
 
-mBaseTimeControl=lmer(reactionTime~endTime*block+deg*endTime+deg*correctSide+MRexperience+(deg+endTime|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+mBaseTimeControl=lmer(reactionTime~time*block+deg*time+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 mBaseTimeControl.summary=modelSummary(mBaseTimeControl,0)
 #main effect of block
-mBaseTimeControl2=lmer(reactionTime~endTime*block-block+deg*endTime+deg*correctSide+MRexperience+(deg+endTime|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+mBaseTimeControl2=lmer(reactionTime~time*block-block+deg*time+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 anova(mBaseTimeControl2,mBaseTimeControl)
 #block non significant
 
 #treatment group
 dataset.rt=datasetA4a[which(datasetA4a$group=="treatment"),]
 
-mBaseTimeTreatment=lmer(reactionTime~endTime*block+deg*endTime+deg*correctSide+MRexperience+(deg+endTime|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+mBaseTimeTreatment=lmer(reactionTime~time*block+deg*time+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 mBaseTimeTreatment.summary=modelSummary(mBaseTimeTreatment,0)
 #effect of deg*block
-mBaseTimeTreatment2=lmer(reactionTime~endTime*block-block+deg*endTime+deg*correctSide+MRexperience+(deg+endTime|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+mBaseTimeTreatment2=lmer(reactionTime~time*block-block+deg*time+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 anova(mBaseTimeTreatment2,mBaseTimeTreatment)
 #block significant
