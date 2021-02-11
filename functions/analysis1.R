@@ -21,7 +21,24 @@ source("functions/helpers.R")
 #load dataset
 dataset.rt=datasetA1
 #get random slopes
-mBaseTime=lmer(reactionTime~deg*time*block+deg*correctSide+MRexperience+(deg*time*block|ID)+(deg|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+#models are reduced if the complex model produces a singular fit or the less complex model is not significantly worse (at alpha=0.2)
+m0=lmer(reactionTime~deg*time*block+deg*correctSide+MRexperience+(deg*block|ID)+(deg*block|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+#singular fit
+m1=lmer(reactionTime~deg*time*block+deg*correctSide+MRexperience+(deg*block||ID)+(deg*block||modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+#singular fit
+m2=lmer(reactionTime~deg*time*block+deg*correctSide+MRexperience+(deg+block||ID)+(deg+block||modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+#singular fit
+m3=lmer(reactionTime~deg*time*block+deg*correctSide+MRexperience+(deg+block||ID)+(deg||modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+#good
+m4=lmer(reactionTime~deg*time*block+deg*correctSide+MRexperience+(deg+block||ID)+(block||modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+#singular fit
+m4=lmer(reactionTime~deg*time*block+deg*correctSide+MRexperience+(deg+block|ID)+(deg|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+#singular fit
+m5=lmer(reactionTime~deg*time*block+deg*correctSide+MRexperience+(deg+block|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+anova(m3,m5)
+#m5 is better
+m6=lmer(reactionTime~deg*time*block+deg*correctSide+MRexperience+(deg+time+block|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+anova(m5,m6)
 
 
 #load dataset
