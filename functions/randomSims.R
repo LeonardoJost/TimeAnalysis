@@ -35,7 +35,7 @@ center=function(var,group) {
   return(var-tapply(var,group,mean,na.rm=T)[group])
 }
 
-randomSims=function(myDataTest,myDataControl,randomSeed,numSims=1000){
+randomSims=function(myDataTest,myDataControl,randomSeed,numSims=1000,noTime=TRUE,time=TRUE,timeCov=TRUE){
   #set.seed(783881)
   set.seed(randomSeed)
   dataOfSims=data.frame(matrix(ncol=8,nrow=numSims))
@@ -57,44 +57,59 @@ randomSims=function(myDataTest,myDataControl,randomSeed,numSims=1000){
     randomGroupData$timeCovariate=center(randomGroupData$time,randomGroupData$block)
     repeat{ #this is actually only run once but simpler to cancel the rest of the code in this block
       #analysis without time
-      mNoTime=lmer(reactionTime~deg*block*group+deg*correctSide+MRexperience+(deg+block|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-      if(isSingular(mNoTime)){
-        print(paste(i,": singular fit for notime model",sep=" "))
-        break
+      if(noTime){
+        mNoTime=lmer(reactionTime~deg*block*group+deg*correctSide+MRexperience+(deg+block|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+        if(!is.null(mNoTime@optinfo$conv$lme4$messages)){
+          print(paste(i,": convergence issues for notime model",sep=" "))
+          break
+        }
+        mNoTime2=lmer(reactionTime~deg*block*group+deg*correctSide+MRexperience-block:group+(deg+block|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+        if(!is.null(mNoTime2@optinfo$conv$lme4$messages)){
+          print(paste(i,": convergence issues for notime model",sep=" "))
+          break
+        }
+        pNoTime=anova(mNoTime,mNoTime2)[[8]][2]
+        coefNoTime=coef(summary(mNoTime))[9]
+      } else {
+        pNoTime=0
+        coefNoTime=0
       }
-      mNoTime2=lmer(reactionTime~deg*block*group+deg*correctSide+MRexperience-block:group+(deg+block|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-      if(isSingular(mNoTime2)){
-        print(paste(i,": singular fit for notime model2",sep=" "))
-        break
-      }
-      pNoTime=anova(mNoTime,mNoTime2)[[8]][2]
-      coefNoTime=coef(summary(mNoTime))[9]
       #analysis with time
-      mTime=lmer(reactionTime~deg*time*block*group+deg*correctSide+MRexperience+(deg+block+time|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-      if(isSingular(mTime)){
-        print(paste(i,": singular fit for time model",sep=" "))
-        break
+      if(time){
+        mTime=lmer(reactionTime~deg*time*block*group+deg*correctSide+MRexperience+(deg+block+time|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+        if(!is.null(mTime@optinfo$conv$lme4$messages)){
+          print(paste(i,": convergence issues for time model",sep=" "))
+          break
+        }
+        mTime2=lmer(reactionTime~deg*time*block*group+deg*correctSide+MRexperience-block:group+(deg+block+time|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+        if(!is.null(mTime2@optinfo$conv$lme4$messages)){
+          print(paste(i,": convergence issues for time model2",sep=" "))
+          break
+        }
+        pTime=anova(mTime,mTime2)[[8]][2]
+        coefTime=coef(summary(mTime))[13]
+      } else {
+        pTime=0
+        coefTime=0
       }
-      mTime2=lmer(reactionTime~deg*time*block*group+deg*correctSide+MRexperience-block:group+(deg+block+time|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-      if(isSingular(mTime2)){
-        print(paste(i,": singular fit for time model2",sep=" "))
-        break
-      }
-      pTime=anova(mTime,mTime2)[[8]][2]
-      coefTime=coef(summary(mTime))[13]
       #analysis with time as covariate
-      mTimeCov=lmer(reactionTime~deg*block*group+block*group*timeCovariate+deg*correctSide+MRexperience+(deg+block|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-      if(isSingular(mTimeCov)){
-        print(paste(i,": singular fit for timeCov model",sep=" "))
-        break
+      if(timeCov){
+        mTimeCov=lmer(reactionTime~deg*block*group+block*group*timeCovariate+deg*correctSide+MRexperience+(deg+block|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+        if(!is.null(mTimeCov@optinfo$conv$lme4$messages)){
+          print(paste(i,": convergence issues for timeCov model",sep=" "))
+          break
+        }
+        mTimeCov2=lmer(reactionTime~deg*block*group+block*group*timeCovariate+deg*correctSide+MRexperience-block:group+(deg+block|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+        if(!is.null(mTimeCov2@optinfo$conv$lme4$messages)){
+          print(paste(i,": convergence issues for timeCov model",sep=" "))
+          break
+        }
+        pTimeCov=anova(mTimeCov,mTimeCov2)[[8]][2]
+        coefTimeCov=coef(summary(mTimeCov))[10]
+      } else {
+        pTimeCov=0
+        coefTimeCov=0
       }
-      mTimeCov2=lmer(reactionTime~deg*block*group+block*group*timeCovariate+deg*correctSide+MRexperience-block:group+(deg+block|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-      if(isSingular(mTimeCov2)){
-        print(paste(i,": singular fit for timeCov model2",sep=" "))
-        break
-      }
-      pTimeCov=anova(mTimeCov,mTimeCov2)[[8]][2]
-      coefTimeCov=coef(summary(mTimeCov))[10]
       #save data
       dataOfSims$randomSample[i]=list(randomSample)
       dataOfSims$limit[i]=limit
@@ -112,13 +127,16 @@ randomSims=function(myDataTest,myDataControl,randomSeed,numSims=1000){
   }
   return(dataOfSims)
 }
-
-dataOfSims=randomSims(myDataTest,myDataControl,783881)
+#generate random seeds
+#sample(100000)[1]
+#96235
+#66215
+dataOfSims=randomSims(myDataTest,myDataControl,96235)
 #use control group for both
-dataOfSimsControl=randomSims(myDataControl,myDataControl,394717)
-sum(dataOfSimsControl$pNoTime>0.05)
-sum(dataOfSimsControl$pTime>0.05)
-sum(dataOfSimsControl$pTimeCov>0.05)
+dataOfSimsControl=randomSims(myDataControl,myDataControl,66215)
+sum(dataOfSimsControl$pNoTime<0.05)
+sum(dataOfSimsControl$pTime<0.05)
+sum(dataOfSimsControl$pTimeCov<0.05)
 #save(dataOfSims,file="functions\\time as fixed Effect\\dataOfSims.RData")
 #group by significance and type of analysis
 sum(dataOfSims$pNoTime>0.05 & dataOfSims$pTime>0.05)
@@ -142,7 +160,7 @@ plotSelectedIndex=function(index,name){
   #get data of random participants
   treatmentGroup=myDataTest[which(myDataTest$ID %in% randomSampleTreatment),]
   controlGroup=myDataControl[which(myDataControl$ID %in% randomSampleControl),]
-  randomGroupData=getReactionTimeDataset(rbind(treatmentGroup,controlGroup))
+  randomGroupData=rbind(treatmentGroup,controlGroup)
   randomGroupData$cond=paste(randomGroupData$group,ifelse(randomGroupData$block=="main1","pretest","posttest"),sep="*")
   randomGroupData$condLinetype=randomGroupData$group
   randomGroupData$condColor=randomGroupData$group
