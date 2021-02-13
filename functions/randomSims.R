@@ -17,11 +17,11 @@
 library(lme4)
 library(optimx)
 source("functions/helpers.R")
-
+#center variable(vector) within groups
 center=function(var,group) {
   return(var-tapply(var,group,mean,na.rm=T)[group])
 }
-
+#random simulations
 randomSims=function(myDataTest,myDataControl,randomSeed,numSims=1000,noTime=TRUE,time=TRUE,timeCov=TRUE){
   #set.seed(783881)
   set.seed(randomSeed)
@@ -63,12 +63,12 @@ randomSims=function(myDataTest,myDataControl,randomSeed,numSims=1000,noTime=TRUE
       }
       #analysis with time
       if(time){
-        mTime=lmer(reactionTime~deg*time*block*group+deg*correctSide+MRexperience+(deg+block+time|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+        mTime=lmer(reactionTime~deg*time*block*group+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
         if(!is.null(mTime@optinfo$conv$lme4$messages)){
           print(paste(i,": convergence issues for time model",sep=" "))
           break
         }
-        mTime2=lmer(reactionTime~deg*time*block*group+deg*correctSide+MRexperience-block:group+(deg+block+time|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+        mTime2=lmer(reactionTime~deg*time*block*group+deg*correctSide+MRexperience-block:group+(deg+time|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
         if(!is.null(mTime2@optinfo$conv$lme4$messages)){
           print(paste(i,": convergence issues for time model2",sep=" "))
           break
@@ -114,6 +114,27 @@ randomSims=function(myDataTest,myDataControl,randomSeed,numSims=1000,noTime=TRUE
   }
   return(dataOfSims)
 }
+
+#plot selected indices
+plotSelectedIndex=function(index,name){
+  #get data from index
+  randomSample=unlist(dataOfSims$randomSample[index])
+  limit=dataOfSims$limit[index]
+  randomSampleTreatment=randomSample[1:limit]
+  randomSampleControl=randomSample[(limit+1):length(randomSample)]
+  #get data of random participants
+  treatmentGroup=myDataTest[which(myDataTest$ID %in% randomSampleTreatment),]
+  controlGroup=myDataControl[which(myDataControl$ID %in% randomSampleControl),]
+  randomGroupData=rbind(treatmentGroup,controlGroup)
+  randomGroupData$cond=paste(randomGroupData$group,ifelse(randomGroupData$block=="main1","pretest","posttest"),sep="*")
+  randomGroupData$condLinetype=randomGroupData$group
+  randomGroupData$condColor=randomGroupData$group
+  #plot graph
+  generateTableAndGraphsForCondition(randomGroupData,name,FALSE,TRUE,legendProp=list(color="Group",linetypes="Group",shape="Group"))
+  #print values
+  print(dataOfSims[index,])
+}
+
 #generate random seeds
 #sample(100000)[1]
 #96235
@@ -137,25 +158,8 @@ sum(dataOfSims$pNoTime>0.05 & dataOfSims$pTimeCov>0.05)
 dataOfSims[which(dataOfSims$coefNoTime>0),]
 dataOfSims[which(dataOfSims$coefTime>0),]
 dataOfSims[which(dataOfSims$coefTimeCov>0),]
-#plot selected indices
-plotSelectedIndex=function(index,name){
-  #get data from index
-  randomSample=unlist(dataOfSims$randomSample[index])
-  limit=dataOfSims$limit[index]
-  randomSampleTreatment=randomSample[1:limit]
-  randomSampleControl=randomSample[(limit+1):length(randomSample)]
-  #get data of random participants
-  treatmentGroup=myDataTest[which(myDataTest$ID %in% randomSampleTreatment),]
-  controlGroup=myDataControl[which(myDataControl$ID %in% randomSampleControl),]
-  randomGroupData=rbind(treatmentGroup,controlGroup)
-  randomGroupData$cond=paste(randomGroupData$group,ifelse(randomGroupData$block=="main1","pretest","posttest"),sep="*")
-  randomGroupData$condLinetype=randomGroupData$group
-  randomGroupData$condColor=randomGroupData$group
-  #plot graph
-  generateTableAndGraphsForCondition(randomGroupData,name,FALSE,TRUE,legendProp=list(color="Group",linetypes="Group",shape="Group"))
-  #print values
-  print(dataOfSims[index,])
-}
+
+#plot dataset for maximum p-values
 #maximum p value of Time analysis while no time significant
 maxPTime=which(dataOfSims$pTime==max(dataOfSims$pTime[which(dataOfSims$pNoTime<0.05)]))
 plotSelectedIndex(maxPTime,"randommaxPTime")

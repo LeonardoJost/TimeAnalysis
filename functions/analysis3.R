@@ -36,7 +36,7 @@ mTime2.summary=modelSummary(mTime2,0)
 #split time*block*group
 mTime3=lmer(reactionTime~deg*block*group+deg*time*group+deg*time*block+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 mTime3.summary=modelSummary(mTime3,0)
-#split deg*group*time
+#split deg*time*group
 mTime4=lmer(reactionTime~deg*block*group+time*group+deg*time*block+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 mTime4.summary=modelSummary(mTime4,0)
 #split group*time
