@@ -18,19 +18,6 @@ library(lme4)
 library(optimx)
 source("functions/helpers.R")
 
-getReactionTimeDataset=function(myData){
-  #scaling
-  myData$deg=myData$deg/100
-  myData$time=myData$time/30 #30 minutes (time is already in minutes)
-  #center degree
-  myData$deg=myData$deg-mean(myData$deg) 
-  #normalizing time and centering degree are necessary to analyze main effects of partial interaction (block*group) when higher-
-  #order interactions are present (deg*block*group+time*block*group). Main effects are calculated for value 0
-  #0 of degree: average effect due to centering (this is "standard" main effect of removing higher order interaction)
-  #0 of time: difference between blocks
-  return(myData)
-}
-
 center=function(var,group) {
   return(var-tapply(var,group,mean,na.rm=T)[group])
 }

@@ -23,19 +23,9 @@ dataset.rt=datasetA3
 ## analysis without time
 mBase=lmer(reactionTime~deg*block*group+deg*correctSide+MRexperience+(deg+block|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 mBase.summary=modelSummary(mBase,0)
-#all effects significant
 #main effect of block*group
 mBlockXGroup=lmer(reactionTime~deg*block*group-block:group+deg*correctSide+MRexperience+(deg+block|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 anova(mBase,mBlockXGroup)
-
-#main effects of two-way-interactions
-mBase2=lmer(reactionTime~block*group+deg*group+deg*block+deg*correctSide+MRexperience+(deg+block|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-mBase2.summary=modelSummary(mBase2,0)
-#stepwise remove nonsignificant effects
-#remove group*deg
-mBase3=lmer(reactionTime~block*group+deg*block+deg*correctSide+MRexperience+(deg+block|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-mBase3.summary=modelSummary(mBase3,0)
-#all effects significant
 
 ## analysis with time
 mBaseTime=lmer(reactionTime~deg*time*block*group+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
@@ -59,17 +49,6 @@ mTime6.summary=modelSummary(mTime6,0)
 mTime7=lmer(reactionTime~deg*block*group+deg*time+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 mTime7.summary=modelSummary(mTime7,0)
 #all effects significant
-
-#nonsignificant effects
-#deg*block*time
-mTimeDegXBlockXTime=lmer(reactionTime~deg*block*time+deg*block*group+deg*time+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-mTimeDegXBlockXTime.summary=modelSummary(mTimeDegXBlockXTime,0)
-#block*group*time
-mTimeBlockXGroupXTime=lmer(reactionTime~block*group*time+deg*block*group+deg*time+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-mTimeBlockXGroupXTime.summary=modelSummary(mTimeBlockXGroupXTime,0)
-#deg*group*time
-mTimeDegXGroupXTime=lmer(reactionTime~deg*group*time+deg*block*group+deg*time+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-mTimeDegXGroupXTime.summary=modelSummary(mTimeDegXGroupXTime,0)
 
 #main effects of two-way-interactions
 #block*group

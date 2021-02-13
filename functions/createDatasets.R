@@ -19,10 +19,12 @@ source("functions/helpers.R")
 source("functions/generateGraphsAndTables.R", encoding="utf-8")
 getReactionTimeDataset=function(myData){
   #scaling
-  myData$deg=myData$deg/100
   myData$time=myData$time/30 #30 minutes (time is already in minutes)
   #center degree
-  myData$deg=myData$deg-mean(myData$deg) 
+  myData$deg=scale(myData$deg)
+  #myData$block=sapply(myData$block,function(i) contr.sum(3)[i,])
+  myData$correctSide=sapply(as.factor(myData$correctSide),function(i) contr.sum(2)[i,])
+  myData$MRexperience=sapply(as.factor(myData$MRexperience),function(i) contr.sum(2)[i,])
   #normalizing time and centering degree are necessary to analyze main effects of partial interaction (block*group) when higher-
   #order interactions are present (deg*block*group+time*block*group). Main effects are calculated for value 0
   #0 of degree: average effect due to centering (this is "standard" main effect of removing higher order interaction)
@@ -43,6 +45,7 @@ dir.create("figs/MR/accData/")
 #load full dataset
 myData=read.csv(file="data\\dataset.csv",sep=";")
 myData$time=myData$endTime
+myData$ID=as.factor(myData$ID)
 #reaction time dataset
 myData=myData[which(!myData$outlier),]
 myData=myData[which(myData$typeOutlier=="hit"),]
@@ -51,6 +54,18 @@ myData$block=toChar(myData$block)
 myData$block=ifelse(myData$time>10*60*1000,ifelse(myData$time>20*60*1000,"main3","main2"),"main1")
 #normalize time to minutes
 myData$time=myData$time/60000
+#calculate mean improvement from block 1 to 2
+myData$meanImprovement=0
+for(id in levels(as.factor(myData$ID))){
+  myData$meanImprovement[which(myData$ID==id)]=
+    mean(myData$reactionTime[which(myData$ID==id & myData$block=="main1")])-
+    mean(myData$reactionTime[which(myData$ID==id & myData$block=="main2")])
+}
+#calculate average performance in first block
+myData$meanPerformance=0
+for(id in levels(as.factor(myData$ID))){
+  myData$meanPerformance[which(myData$ID==id)]=mean(myData$reactionTime[which(myData$ID==id & myData$block=="main1")])
+}
 
 ### analysis 1
 #all blocks
@@ -79,18 +94,13 @@ myDataTest$block[which(myDataTest$block=="main3")]="main2"
 myDataControl=myData[which(myData$block!="main3"),]
 myDataControl$group="control"
 #create new ids for control (simulate different subjects in both groups)
-levels(myDataControl$ID)=paste("idControl",sample.int(length(levels(myDataControl$ID))),sep="")
+levels(myDataControl$ID)=paste(levels(myDataControl$ID),"control",sep="")
 myDataTestControl=rbind(myDataTest,myDataControl)
 
 ### analysis 3
 datasetA3=getReactionTimeDataset(myDataTestControl)
 
 ### analysis 4a
-#calculate average performance in first block
-myDataTestControl$meanPerformance=0
-for(id in levels(as.factor(myDataTestControl$ID))){
-  myDataTestControl$meanPerformance[which(myDataTestControl$ID==id)]=mean(myDataTestControl$reactionTime[which(myDataTestControl$ID==id & myDataTestControl$block=="main1")])
-}
 #select by performance and group (better group as treatment)
 myDataTestControl2=myDataTestControl[which((myDataTestControl$group=="treatment" & myDataTestControl$meanPerformance<median(myDataTestControl$meanPerformance)) |
                                              (myDataTestControl$group=="control" & myDataTestControl$meanPerformance>=median(myDataTestControl$meanPerformance))
@@ -117,16 +127,10 @@ myDataTestControl3$condColor=myDataTestControl3$group
 generateTableAndGraphsForCondition(myDataTestControl3,"blockXgroup4b",FALSE,TRUE,legendProp=list(color="Group",linetypes="Group",shape="Group"))
 
 ### analysis 5a
-#compare block 1 and 2/3 without actual treatment but separated by performance
-myDataTestControl4=myData
-#calculate average performance in first block
-myDataTestControl4$meanPerformance=0
-for(id in levels(as.factor(myDataTestControl4$ID))){
-  myDataTestControl4$meanPerformance[which(myDataTestControl4$ID==id)]=mean(myDataTestControl4$reactionTime[which(myDataTestControl4$ID==id & myDataTestControl4$block=="main1")])
-}
-myDataTestControl4$group=ifelse(myDataTestControl4$meanPerformance<median(myDataTestControl4$meanPerformance),"treatment","control")
-#merge block 2 and 3
-myDataTestControl4$block[which(myDataTestControl4$block=="main3")]="main2"
+#better learners in control group
+myDataTestControl4=myDataTestControl[which((myDataTestControl$group=="treatment" & myDataTestControl$meanImprovement<median(myDataTestControl$meanImprovement)) |
+                                             (myDataTestControl$group=="control" & myDataTestControl$meanImprovement>=median(myDataTestControl$meanImprovement))
+),]
 
 datasetA5a=getReactionTimeDataset(myDataTestControl4)
 #plot block*group interaction over time
@@ -135,15 +139,9 @@ myDataTestControl4$condLinetype=myDataTestControl4$group
 myDataTestControl4$condColor=myDataTestControl4$group
 generateTableAndGraphsForCondition(myDataTestControl4,"blockXgroup5a",FALSE,TRUE,legendProp=list(color="Group",linetypes="Group",shape="Group"))
 
-### analysis 5b
-#separate groups not by performance but by improvement
-myDataTestControl5=myDataTestControl4
-for(id in levels(as.factor(myDataTestControl4$ID))){
-  myDataTestControl5$meanPerformance[which(myDataTestControl5$ID==id)]=
-    mean(myDataTestControl5$reactionTime[which(myDataTestControl5$ID==id & myDataTestControl5$block=="main1")])-
-    mean(myDataTestControl5$reactionTime[which(myDataTestControl5$ID==id & myDataTestControl5$block=="main2")])
-}
-myDataTestControl5$group=ifelse(myDataTestControl5$meanPerformance<median(myDataTestControl5$meanPerformance),"control","treatment")
+#no treatment
+myDataTestControl5=myDataTestControl[which(myDataTestControl$group=="control"),]
+myDataTestControl5$group=ifelse(myDataTestControl5$meanImprovement>=median(myDataTestControl5$meanImprovement),"treatment","control")
 
 datasetA5b=getReactionTimeDataset(myDataTestControl5)
 #plot block*group interaction over time
@@ -151,6 +149,8 @@ myDataTestControl5$cond=paste(myDataTestControl5$group,ifelse(myDataTestControl5
 myDataTestControl5$condLinetype=myDataTestControl5$group
 myDataTestControl5$condColor=myDataTestControl5$group
 generateTableAndGraphsForCondition(myDataTestControl5,"blockXgroup5b",FALSE,TRUE,legendProp=list(color="Group",linetypes="Group",shape="Group"))
+
+
 
 ### random simulations
 #get control and treatment data from all participants

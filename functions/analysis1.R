@@ -20,29 +20,6 @@ source("functions/helpers.R")
 
 #load dataset
 dataset.rt=datasetA1
-#get random slopes
-#models are reduced if the complex model produces a singular fit or the less complex model is not significantly worse (at alpha=0.2)
-m0=lmer(reactionTime~deg*time*block+deg*correctSide+MRexperience+(deg*block|ID)+(deg*block|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-#singular fit
-m1=lmer(reactionTime~deg*time*block+deg*correctSide+MRexperience+(deg*block||ID)+(deg*block||modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-#singular fit
-m2=lmer(reactionTime~deg*time*block+deg*correctSide+MRexperience+(deg+block||ID)+(deg+block||modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-#singular fit
-m3=lmer(reactionTime~deg*time*block+deg*correctSide+MRexperience+(deg+block||ID)+(deg||modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-#good
-m4=lmer(reactionTime~deg*time*block+deg*correctSide+MRexperience+(deg+block||ID)+(block||modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-#singular fit
-m4=lmer(reactionTime~deg*time*block+deg*correctSide+MRexperience+(deg+block|ID)+(deg|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-#singular fit
-m5=lmer(reactionTime~deg*time*block+deg*correctSide+MRexperience+(deg+block|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-anova(m3,m5)
-#m5 is better
-m6=lmer(reactionTime~deg*time*block+deg*correctSide+MRexperience+(deg+time+block|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-anova(m5,m6)
-
-
-#load dataset
-dataset.rt=datasetA1
 ## analysis without time
 mBase=lmer(reactionTime~deg*block+deg*correctSide+MRexperience+(deg+block|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 mBase.summary=modelSummary(mBase,0)
@@ -66,37 +43,18 @@ mTime5=lmer(reactionTime~deg*time+deg*correctSide+MRexperience+(deg+time|ID)+(1|
 mTime5.summary=modelSummary(mTime5,0)
 #all effects significant
 
-#nonsignificant effects
-#block
-mTimeBlock=lmer(reactionTime~block+deg*time+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-mTimeBlock.summary=modelSummary(mTimeBlock,0)
-#deg*block
-mTimeDegXBlock=lmer(reactionTime~deg*block+deg*time+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-mTimeDegXBlock.summary=modelSummary(mTimeDegXBlock,0)
 #time*block
 mTimeTimeXBlock=lmer(reactionTime~time*block+deg*time+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 mTimeTimeXBlock.summary=modelSummary(mTimeTimeXBlock,0)
 
 
 ###center time
-#move all to 0
-dataset.rt$time2=dataset.rt$time
-dataset.rt$time2[which(dataset.rt$block=="main3")]=dataset.rt$time[which(dataset.rt$block=="main3")]-20/30
-dataset.rt$time2[which(dataset.rt$block=="main2")]=dataset.rt$time[which(dataset.rt$block=="main2")]-10/30
 center=function(var,group) {
   return(var-tapply(var,group,mean,na.rm=T)[group])
 }
-dataset.rt$time=center(dataset.rt$time,dataset.rt$block)
+dataset.rt$time2=center(dataset.rt$time,dataset.rt$block)
 
-mBaseTimeCovariate=lmer(reactionTime~deg*block+time+deg*correctSide+MRexperience+(deg+block|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+mBaseTimeCovariate=lmer(reactionTime~deg*block+time2+deg*correctSide+MRexperience+(deg+block|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 summary(mBaseTimeCovariate)
-mBaseTimeCovariate2=lmer(reactionTime~deg*block+time2+deg*correctSide+MRexperience+(deg+block|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-summary(mBaseTimeCovariate2)
-
-m1=lmer(reactionTime~block+(deg+block|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-m2=lmer(reactionTime~block+time+(deg+block|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-summary(m1)
-summary(m2)
-dataset.rt$cond=ifelse(dataset.rt$block=="main3","20-30min",ifelse(dataset.rt$block=="main2","10-20min","0-10min"))
-generateTableAndGraphsForCondition(dataset.rt,"block2",TRUE,TRUE,legendProp=list(color="Block",linetypes="Block",shape="Block"))
-
+mBaseTimeCovariate2=lmer(reactionTime~deg*block-block+time2+deg*correctSide+MRexperience+(deg+block|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+anova(mBaseTimeCovariate,mBaseTimeCovariate2)
