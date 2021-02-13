@@ -102,8 +102,8 @@ datasetA3=getReactionTimeDataset(myDataTestControl)
 
 ### analysis 4a
 #select by performance and group (better group as treatment)
-myDataTestControl2=myDataTestControl[which((myDataTestControl$group=="treatment" & myDataTestControl$meanPerformance<median(myDataTestControl$meanPerformance)) |
-                                             (myDataTestControl$group=="control" & myDataTestControl$meanPerformance>=median(myDataTestControl$meanPerformance))
+myDataTestControl2=myDataTestControl[which((myDataTestControl$group=="treatment" & myDataTestControl$meanPerformance<median(unique(myDataTestControl$meanPerformance))) |
+                                             (myDataTestControl$group=="control" & myDataTestControl$meanPerformance>=median(unique(myDataTestControl$meanPerformance)))
 ),]
 
 datasetA4a=getReactionTimeDataset(myDataTestControl2)
@@ -115,8 +115,8 @@ generateTableAndGraphsForCondition(myDataTestControl2,"blockXgroup4a",FALSE,TRUE
 
 ### analysis 4b
 #select by performance and group (better group as control)
-myDataTestControl3=myDataTestControl[which((myDataTestControl$group=="treatment" & myDataTestControl$meanPerformance>=median(myDataTestControl$meanPerformance)) |
-                                             (myDataTestControl$group=="control" & myDataTestControl$meanPerformance<median(myDataTestControl$meanPerformance))
+myDataTestControl3=myDataTestControl[which((myDataTestControl$group=="treatment" & myDataTestControl$meanPerformance>=median(unique(myDataTestControl$meanPerformance))) |
+                                             (myDataTestControl$group=="control" & myDataTestControl$meanPerformance<median(unique(myDataTestControl$meanPerformance)))
 ),]
 
 datasetA4b=getReactionTimeDataset(myDataTestControl3)
@@ -128,8 +128,8 @@ generateTableAndGraphsForCondition(myDataTestControl3,"blockXgroup4b",FALSE,TRUE
 
 ### analysis 5a
 #better learners in control group
-myDataTestControl4=myDataTestControl[which((myDataTestControl$group=="treatment" & myDataTestControl$meanImprovement<median(myDataTestControl$meanImprovement)) |
-                                             (myDataTestControl$group=="control" & myDataTestControl$meanImprovement>=median(myDataTestControl$meanImprovement))
+myDataTestControl4=myDataTestControl[which((myDataTestControl$group=="treatment" & myDataTestControl$meanImprovement<median(unique(myDataTestControl$meanImprovement))) |
+                                             (myDataTestControl$group=="control" & myDataTestControl$meanImprovement>=median(unique(myDataTestControl$meanImprovement)))
 ),]
 
 datasetA5a=getReactionTimeDataset(myDataTestControl4)
