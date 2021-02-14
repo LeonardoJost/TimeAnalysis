@@ -38,12 +38,4 @@ mTime3.summary=modelSummary(mTime3,0)
 #split deg*block
 mTime4=lmer(reactionTime~block+deg*time+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 mTime4.summary=modelSummary(mTime4,0)
-#all effects significant
-
-#nonsignificant effects
-#deg*block
-mTimeDegXBlock=lmer(reactionTime~deg*block+deg*time+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-mTimeDegXBlock.summary=modelSummary(mTimeDegXBlock,0)
-#time*block
-mTimeTimeXBlock=lmer(reactionTime~time*block+deg*time+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
-mTimeTimeXBlock.summary=modelSummary(mTimeTimeXBlock,0)
+#block significant

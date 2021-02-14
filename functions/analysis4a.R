@@ -54,3 +54,6 @@ mTime6.summary=modelSummary(mTime6,0)
 #main effects of block*group
 mTime7=lmer(reactionTime~time*block*group+deg*group+deg*time+deg*correctSide+MRexperience-block:group+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 anova(mTime6,mTime7)
+#main effects of block
+mTime8=lmer(reactionTime~time*block*group+deg*group+deg*time+deg*correctSide+MRexperience-block+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+anova(mTime6,mTime8)
