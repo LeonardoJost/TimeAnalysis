@@ -41,5 +41,7 @@ anova(m3,m5)
 m6=lmer(reactionTime~deg*time*block+deg*correctSide+MRexperience+(deg+block+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 #singular fit
 m7=lmer(reactionTime~deg*time*block+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+m8=lmer(reactionTime~deg*time*block+deg*correctSide+MRexperience+(time+block|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+anova(m7,m8)
 anova(m5,m7)
 #m7 is better

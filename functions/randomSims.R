@@ -23,7 +23,6 @@ center=function(var,group) {
 }
 #random simulations
 randomSims=function(myDataTest,myDataControl,randomSeed,numSims=1000,noTime=TRUE,time=TRUE,timeCov=TRUE){
-  #set.seed(783881)
   set.seed(randomSeed)
   dataOfSims=data.frame(matrix(ncol=8,nrow=numSims))
   names(dataOfSims)=c("randomSample","limit","pNoTime","pTime","coefNoTime","coefTime","pTimeCov","coefTimeCov")
@@ -138,10 +137,10 @@ plotSelectedIndex=function(index,name){
 #generate random seeds
 #sample(100000)[1]
 #96235
-#66215
+#50793
 dataOfSims=randomSims(myDataTest,myDataControl,96235)
 #use control group for both
-dataOfSimsControl=randomSims(myDataControl,myDataControl,66215)
+dataOfSimsControl=randomSims(myDataControl,myDataControl,50793)
 sum(dataOfSimsControl$pNoTime<0.05)
 sum(dataOfSimsControl$pTime<0.05)
 sum(dataOfSimsControl$pTimeCov<0.05)
@@ -171,3 +170,17 @@ plotSelectedIndex(maxPNoTime,"randommaxPNoTime")
 #maximum of both (sum of both)
 maxPBoth=which(dataOfSims$pNoTime+dataOfSims$pTime==max(dataOfSims$pNoTime+dataOfSims$pTime))
 plotSelectedIndex(maxPBoth,"randommaxPBoth")
+
+#plot p-values of no treatment simulation to check type1 error rate
+library(ggplot2)
+dataOfSimsControl$pTimeSorted=sort(dataOfSimsControl$pTime)
+dataOfSimsControl$pNoTimeSorted=sort(dataOfSimsControl$pNoTime)
+dataOfSimsControl$pTimeCovSorted=sort(dataOfSimsControl$pTimeCov)
+ggplot(dataOfSimsControl,aes(x=c(0:999))) + 
+  geom_line(aes(y=pTimeSorted,color="1")) +
+  geom_line(aes(y=pNoTimeSorted,color="2")) +
+  geom_line(aes(y=pTimeCovSorted,color="3")) +
+  geom_line(aes(y=c(0:999)/999,color="4")) +
+  scale_color_discrete(name = "", labels = c("time", "no time", "time as covariate", "expected")) +
+  labs(x="number of simulations",y="magnitude of p-values") +
+  theme_classic() + theme(legend.position = c(0.2,0.8))
