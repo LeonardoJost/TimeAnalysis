@@ -115,16 +115,19 @@ randomSims=function(myDataTest,myDataControl,randomSeed,numSims=1000,noTime=TRUE
 }
 
 #plot selected indices
-plotSelectedIndex=function(index,name){
+plotSelectedIndex=function(dataOfSims,myDataTest,myDataControl,index,name){
   #get data from index
   randomSample=unlist(dataOfSims$randomSample[index])
   limit=dataOfSims$limit[index]
   randomSampleTreatment=randomSample[1:limit]
   randomSampleControl=randomSample[(limit+1):length(randomSample)]
   #get data of random participants
+  #get data of random participants
   treatmentGroup=myDataTest[which(myDataTest$ID %in% randomSampleTreatment),]
+  treatmentGroup$group="treatment"
   controlGroup=myDataControl[which(myDataControl$ID %in% randomSampleControl),]
-  randomGroupData=rbind(treatmentGroup,controlGroup)
+  controlGroup$group="control"
+  randomGroupData=getReactionTimeDataset(rbind(treatmentGroup,controlGroup))
   randomGroupData$cond=paste(randomGroupData$group,ifelse(randomGroupData$block=="main1","pretest","posttest"),sep="*")
   randomGroupData$condLinetype=randomGroupData$group
   randomGroupData$condColor=randomGroupData$group
@@ -153,7 +156,9 @@ sum(dataOfSims$pNoTime<=0.05 & dataOfSims$pTime<=0.05)
 
 sum(dataOfSims$pNoTime<=0.05 & dataOfSims$pTimeCov<=0.05)
 sum(dataOfSims$pNoTime>0.05 & dataOfSims$pTimeCov>0.05)
-#coefficients in wrong direction?
+sum(dataOfSims$pNoTime<=0.05 & dataOfSims$pTimeCov>0.05)
+sum(dataOfSims$pNoTime>0.05 & dataOfSims$pTimeCov<=0.05)
+#coefficients in wrong direction
 dataOfSims[which(dataOfSims$coefNoTime>0),]
 dataOfSims[which(dataOfSims$coefTime>0),]
 dataOfSims[which(dataOfSims$coefTimeCov>0),]
@@ -161,15 +166,26 @@ dataOfSims[which(dataOfSims$coefTimeCov>0),]
 #plot dataset for maximum p-values
 #maximum p value of Time analysis while no time significant
 maxPTime=which(dataOfSims$pTime==max(dataOfSims$pTime[which(dataOfSims$pNoTime<0.05)]))
-plotSelectedIndex(maxPTime,"randommaxPTime")
+plotSelectedIndex(dataOfSims,myDataTest,myDataControl,maxPTime,"randomTreatmentMaxPTime")
 
 #maximum p value of no time analysis while time significant
 maxPNoTime=which(dataOfSims$pNoTime==max(dataOfSims$pNoTime[which(dataOfSims$pTime<0.05)]))
-plotSelectedIndex(maxPNoTime,"randommaxPNoTime")
+plotSelectedIndex(dataOfSims,myDataTest,myDataControl,maxPNoTime,"randomTreatmentMaxPNoTime")
 
 #maximum of both (sum of both)
 maxPBoth=which(dataOfSims$pNoTime+dataOfSims$pTime==max(dataOfSims$pNoTime+dataOfSims$pTime))
-plotSelectedIndex(maxPBoth,"randommaxPBoth")
+plotSelectedIndex(dataOfSims,myDataTest,myDataControl,maxPBoth,"randomTreatmentMaxPBoth")
+
+#plot data for no treatment condition
+#minimum p value of time analysis while no time not significant
+minPTimeControl=which(dataOfSimsControl$pTime==min(dataOfSimsControl$pTime[which(dataOfSimsControl$pNoTime>=0.05)]))
+plotSelectedIndex(dataOfSimsControl,myDataControl,myDataControl,minPTimeControl,"randomControlMinPTime")
+
+#minimum p value of no time analysis while time not significant
+minPNoTimeControl=which(dataOfSimsControl$pNoTime==min(dataOfSimsControl$pNoTime[which(dataOfSimsControl$pTime>=0.05)]))
+plotSelectedIndex(dataOfSimsControl,myDataControl,myDataControl,minPNoTimeControl,"randomControlMinPNoTime")
+
+
 
 #plot p-values of no treatment simulation to check type1 error rate
 library(ggplot2)
@@ -181,6 +197,9 @@ ggplot(dataOfSimsControl,aes(x=c(0:999))) +
   geom_line(aes(y=pNoTimeSorted,color="2")) +
   geom_line(aes(y=pTimeCovSorted,color="3")) +
   geom_line(aes(y=c(0:999)/999,color="4")) +
-  scale_color_discrete(name = "", labels = c("time", "no time", "time as covariate", "expected")) +
+  scale_color_manual(
+    values=c("1"="red","2"="blue","3"="green","4"="black"), 
+    labels = c("time", "no time", "time as covariate", "expected"),
+    name="analysis type") +
   labs(x="number of simulations",y="magnitude of p-values") +
   theme_classic() + theme(legend.position = c(0.2,0.8))
