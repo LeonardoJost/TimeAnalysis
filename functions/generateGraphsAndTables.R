@@ -95,7 +95,7 @@ generateGraphs=function(dataset,title,legendProp=list(),ylab="Reaction time(ms)"
 #generate lins graphs by time
 generateLineGraphsByTime=function(dataset,title,legendProp=list(),ylab="Reaction time(ms)") {
   if(is.null(legendProp$pos))
-    legendProp$pos=c(0.8,0.8)
+    legendProp$pos=c(0.9,0.9)
   library(ggplot2)
   #plot data as line graph (mean Data by degree and condition)
   ggplot(dataset,aes(y=reactionTime,x=time, color=condColor, linetype=condLinetype)) + 
