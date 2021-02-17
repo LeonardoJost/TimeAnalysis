@@ -137,41 +137,6 @@ generateAccGraphs=function(dataset,title,legendProp=list()) {
   ggsave(paste("figs/",title,"LinePlotByCondDegree.png",sep=""))
 }
 
-#calculate means and mode for questionaire data and save to csv
-calculateMeansQuestionaire=function(verbose,questionaireData,questionaireOutFile,handednessGraphFile){
-  #calculate means and modes by gender and save to csv
-  questionaireDataMeansByGender=data.frame(lapply(questionaireData[which(questionaireData$Gender==levels(as.factor(questionaireData$Gender))[1]),],meanMode),stringsAsFactors = FALSE)
-  for (genderNumber in 1:length(levels(as.factor(questionaireData$Gender))))
-    questionaireDataMeansByGender[genderNumber,]=lapply(questionaireData[which(questionaireData$Gender==levels(as.factor(questionaireData$Gender))[genderNumber]),],meanMode)
-  questionaireDataMeansByGender$ID=levels(as.factor(questionaireData$Gender))
-  #means overall
-  questionaireDataMeans=data.frame(lapply(questionaireData,meanMode),stringsAsFactors = FALSE)
-  
-  #save to csv
-  if (questionaireOutFile!="") {
-    if(verbose>1){
-      print(paste("Writing mean and mode data for questionaires (by gender) to file",paste(questionaireOutFile,"MeansByGender.csv", sep="")))
-      print(paste("Writing mean and mode data for questionaires to file",paste(questionaireOutFile,"Means.csv", sep="")))
-    }
-    write.table(questionaireDataMeansByGender,file=paste(questionaireOutFile,"MeansByGender.csv", sep=""),sep=";", col.names=NA)
-    write.table(questionaireDataMeans,file=paste(questionaireOutFile,"Means.csv", sep=""),sep=";", col.names=NA)
-    #write.table(questionaireData,file=paste(questionaireOutFile,".csv", sep=""),sep=";", col.names=NA)
-  }
-  if (handednessGraphFile!="") {
-    if(verbose>1){
-      print(paste("Writing handedness graph (by gender) to file",handednessGraphFile))
-    }
-    #plot handedness
-    library(ggplot2)
-    if(length(levels(as.factor(questionaireData$Gender)))>1)
-      ggplot(questionaireData,aes(hand)) + geom_histogram(binwidth=0.5,aes(fill=Gender)) +xlab("Handedness") + ylab("Count") + theme_bw()
-    else
-      ggplot(questionaireData,aes(hand)) + geom_histogram(binwidth=0.5) +xlab("Handedness") + ylab("Count") + theme_bw()
-    
-    ggsave(handednessGraphFile)
-  }
-}
-
 #combine multiple images into one
 combineImages=function(imagesList,rows,columns,outputFile,outputWidth=1028){
   library(png) #for reading in PNGs

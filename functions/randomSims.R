@@ -127,7 +127,7 @@ plotSelectedIndex=function(dataOfSims,myDataTest,myDataControl,index,name){
   treatmentGroup$group="treatment"
   controlGroup=myDataControl[which(myDataControl$ID %in% randomSampleControl),]
   controlGroup$group="control"
-  randomGroupData=getReactionTimeDataset(rbind(treatmentGroup,controlGroup))
+  randomGroupData=rbind(treatmentGroup,controlGroup)
   randomGroupData$cond=paste(randomGroupData$group,ifelse(randomGroupData$block=="main1","pretest","posttest"),sep="*")
   randomGroupData$condLinetype=randomGroupData$group
   randomGroupData$condColor=randomGroupData$group
@@ -147,6 +147,11 @@ dataOfSimsControl=randomSims(myDataControl,myDataControl,50793)
 sum(dataOfSimsControl$pNoTime<0.05)
 sum(dataOfSimsControl$pTime<0.05)
 sum(dataOfSimsControl$pTimeCov<0.05)
+#difference between analyses
+sum(dataOfSimsControl$pNoTime>0.05 & dataOfSimsControl$pTime>0.05)
+sum(dataOfSimsControl$pNoTime>0.05 & dataOfSimsControl$pTime<=0.05)
+sum(dataOfSimsControl$pNoTime<=0.05 & dataOfSimsControl$pTime>0.05)
+sum(dataOfSimsControl$pNoTime<=0.05 & dataOfSimsControl$pTime<=0.05)
 #save(dataOfSims,file="functions\\time as fixed Effect\\dataOfSims.RData")
 #group by significance and type of analysis
 sum(dataOfSims$pNoTime>0.05 & dataOfSims$pTime>0.05)
@@ -156,8 +161,11 @@ sum(dataOfSims$pNoTime<=0.05 & dataOfSims$pTime<=0.05)
 
 sum(dataOfSims$pNoTime<=0.05 & dataOfSims$pTimeCov<=0.05)
 sum(dataOfSims$pNoTime>0.05 & dataOfSims$pTimeCov>0.05)
+#difference between time as covariate and not
 sum(dataOfSims$pNoTime<=0.05 & dataOfSims$pTimeCov>0.05)
 sum(dataOfSims$pNoTime>0.05 & dataOfSims$pTimeCov<=0.05)
+sum(dataOfSimsControl$pNoTime<=0.05 & dataOfSimsControl$pTimeCov>0.05)
+sum(dataOfSimsControl$pNoTime>0.05 & dataOfSimsControl$pTimeCov<=0.05)
 #coefficients in wrong direction
 dataOfSims[which(dataOfSims$coefNoTime>0),]
 dataOfSims[which(dataOfSims$coefTime>0),]
@@ -185,6 +193,14 @@ plotSelectedIndex(dataOfSimsControl,myDataControl,myDataControl,minPTimeControl,
 minPNoTimeControl=which(dataOfSimsControl$pNoTime==min(dataOfSimsControl$pNoTime[which(dataOfSimsControl$pTime>=0.05)]))
 plotSelectedIndex(dataOfSimsControl,myDataControl,myDataControl,minPNoTimeControl,"randomControlMinPNoTime")
 
+combineImages(c("figs/MR/Timed/randomTreatmentMaxPTimeLinePlotByCondTime.png",
+                "figs/MR/Timed/randomTreatmentMaxPNoTimeLinePlotByCondTime.png",
+                "figs/MR/Timed/randomTreatmentMaxPBothLinePlotByCondTime.png"),
+              1,3,"figs/MR/Timed/randomTreatmentMaxP.png")
+
+combineImages(c("figs/MR/Timed/randomControlMinPTimeLinePlotByCondTime.png",
+                "figs/MR/Timed/randomControlMinPNoTimeLinePlotByCondTime.png"),
+              1,2,"figs/MR/Timed/randomControlMinP.png")
 
 
 #plot p-values of no treatment simulation to check type1 error rate
