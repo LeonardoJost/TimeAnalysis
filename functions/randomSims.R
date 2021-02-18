@@ -17,6 +17,7 @@
 library(lme4)
 library(optimx)
 source("functions/helpers.R")
+source("functions/generateGraphsAndTables.R", encoding="utf-8")
 #center variable(vector) within groups
 center=function(var,group) {
   return(var-tapply(var,group,mean,na.rm=T)[group])
@@ -115,7 +116,7 @@ randomSims=function(myDataTest,myDataControl,randomSeed,numSims=1000,noTime=TRUE
 }
 
 #plot selected indices
-plotSelectedIndex=function(dataOfSims,myDataTest,myDataControl,index,name){
+plotSelectedIndex=function(dataOfSims,myDataTest,myDataControl,index,name,legendPos=NULL){
   #get data from index
   randomSample=unlist(dataOfSims$randomSample[index])
   limit=dataOfSims$limit[index]
@@ -132,7 +133,7 @@ plotSelectedIndex=function(dataOfSims,myDataTest,myDataControl,index,name){
   randomGroupData$condLinetype=randomGroupData$group
   randomGroupData$condColor=randomGroupData$group
   #plot graph
-  generateTableAndGraphsForCondition(randomGroupData,name,FALSE,TRUE,legendProp=list(color="Group",linetypes="Group",shape="Group"))
+  generateTableAndGraphsForCondition(randomGroupData,name,legendProp=list(color="Group",linetypes="Group",shape="Group",pos=legendPos))
   #print values
   print(dataOfSims[index,])
 }
@@ -159,8 +160,6 @@ sum(dataOfSims$pNoTime>0.05 & dataOfSims$pTime<=0.05)
 sum(dataOfSims$pNoTime<=0.05 & dataOfSims$pTime>0.05)
 sum(dataOfSims$pNoTime<=0.05 & dataOfSims$pTime<=0.05)
 
-sum(dataOfSims$pNoTime<=0.05 & dataOfSims$pTimeCov<=0.05)
-sum(dataOfSims$pNoTime>0.05 & dataOfSims$pTimeCov>0.05)
 #difference between time as covariate and not
 sum(dataOfSims$pNoTime<=0.05 & dataOfSims$pTimeCov>0.05)
 sum(dataOfSims$pNoTime>0.05 & dataOfSims$pTimeCov<=0.05)
@@ -174,11 +173,11 @@ dataOfSims[which(dataOfSims$coefTimeCov>0),]
 #plot dataset for maximum p-values
 #maximum p value of Time analysis while no time significant
 maxPTime=which(dataOfSims$pTime==max(dataOfSims$pTime[which(dataOfSims$pNoTime<0.05)]))
-plotSelectedIndex(dataOfSims,myDataTest,myDataControl,maxPTime,"randomTreatmentMaxPTime")
+plotSelectedIndex(dataOfSims,myDataTest,myDataControl,maxPTime,"randomTreatmentMaxPTime","none")
 
 #maximum p value of no time analysis while time significant
 maxPNoTime=which(dataOfSims$pNoTime==max(dataOfSims$pNoTime[which(dataOfSims$pTime<0.05)]))
-plotSelectedIndex(dataOfSims,myDataTest,myDataControl,maxPNoTime,"randomTreatmentMaxPNoTime")
+plotSelectedIndex(dataOfSims,myDataTest,myDataControl,maxPNoTime,"randomTreatmentMaxPNoTime","none")
 
 #maximum of both (sum of both)
 maxPBoth=which(dataOfSims$pNoTime+dataOfSims$pTime==max(dataOfSims$pNoTime+dataOfSims$pTime))
@@ -187,35 +186,19 @@ plotSelectedIndex(dataOfSims,myDataTest,myDataControl,maxPBoth,"randomTreatmentM
 #plot data for no treatment condition
 #minimum p value of time analysis while no time not significant
 minPTimeControl=which(dataOfSimsControl$pTime==min(dataOfSimsControl$pTime[which(dataOfSimsControl$pNoTime>=0.05)]))
-plotSelectedIndex(dataOfSimsControl,myDataControl,myDataControl,minPTimeControl,"randomControlMinPTime")
+plotSelectedIndex(dataOfSimsControl,myDataControl,myDataControl,minPTimeControl,"randomControlMinPTime","none")
 
 #minimum p value of no time analysis while time not significant
 minPNoTimeControl=which(dataOfSimsControl$pNoTime==min(dataOfSimsControl$pNoTime[which(dataOfSimsControl$pTime>=0.05)]))
 plotSelectedIndex(dataOfSimsControl,myDataControl,myDataControl,minPNoTimeControl,"randomControlMinPNoTime")
 
-combineImages(c("figs/MR/Timed/randomTreatmentMaxPTimeLinePlotByCondTime.png",
-                "figs/MR/Timed/randomTreatmentMaxPNoTimeLinePlotByCondTime.png",
-                "figs/MR/Timed/randomTreatmentMaxPBothLinePlotByCondTime.png"),
-              1,3,"figs/MR/Timed/randomTreatmentMaxP.png")
+combineImages(c("figs/MR/Timed/randomTreatmentMaxPTimeLinePlotByCondTime.tiff",
+                "figs/MR/Timed/randomTreatmentMaxPNoTimeLinePlotByCondTime.tiff",
+                "figs/MR/Timed/randomTreatmentMaxPBothLinePlotByCondTime.tiff"),
+              1,3,"figs/MR/Timed/randomTreatmentMaxP.tiff")
+combineImages(c("figs/MR/Timed/randomControlMinPTimeLinePlotByCondTime.tiff",
+                "figs/MR/Timed/randomControlMinPNoTimeLinePlotByCondTime.tiff"),
+              1,2,"figs/MR/Timed/randomControlMinP.tiff")
 
-combineImages(c("figs/MR/Timed/randomControlMinPTimeLinePlotByCondTime.png",
-                "figs/MR/Timed/randomControlMinPNoTimeLinePlotByCondTime.png"),
-              1,2,"figs/MR/Timed/randomControlMinP.png")
 
 
-#plot p-values of no treatment simulation to check type1 error rate
-library(ggplot2)
-dataOfSimsControl$pTimeSorted=sort(dataOfSimsControl$pTime)
-dataOfSimsControl$pNoTimeSorted=sort(dataOfSimsControl$pNoTime)
-dataOfSimsControl$pTimeCovSorted=sort(dataOfSimsControl$pTimeCov)
-ggplot(dataOfSimsControl,aes(x=c(0:999))) + 
-  geom_line(aes(y=pTimeSorted,color="1")) +
-  geom_line(aes(y=pNoTimeSorted,color="2")) +
-  geom_line(aes(y=pTimeCovSorted,color="3")) +
-  geom_line(aes(y=c(0:999)/999,color="4")) +
-  scale_color_manual(
-    values=c("1"="red","2"="blue","3"="green","4"="black"), 
-    labels = c("time", "no time", "time as covariate", "expected"),
-    name="analysis type") +
-  labs(x="number of simulations",y="magnitude of p-values") +
-  theme_classic() + theme(legend.position = c(0.2,0.8))

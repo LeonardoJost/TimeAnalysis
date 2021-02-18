@@ -73,7 +73,7 @@ datasetA1=getReactionTimeDataset(myData)
 
 #generate some plots of the separation by blocks
 myData$cond=ifelse(myData$block=="main3","20-30min",ifelse(myData$block=="main2","10-20min","0-10min"))
-generateTableAndGraphsForCondition(myData,"block",FALSE,TRUE,legendProp=list(color="Block",linetypes="Block",shape="Block"))
+generateTableAndGraphsForCondition(myData,"block",legendProp=list(color="Block",linetypes="Block",shape="Block"))
 
 #normalize time 0 to end of first block
 myData$time=myData$time-10
@@ -111,7 +111,7 @@ datasetA4a=getReactionTimeDataset(myDataTestControl2)
 myDataTestControl2$cond=paste(myDataTestControl2$group,ifelse(myDataTestControl2$block=="main1","pretest","posttest"),sep="*")
 myDataTestControl2$condLinetype=myDataTestControl2$group
 myDataTestControl2$condColor=myDataTestControl2$group
-generateTableAndGraphsForCondition(myDataTestControl2,"blockXgroup4a",FALSE,TRUE,legendProp=list(color="Group",linetypes="Group",shape="Group"))
+generateTableAndGraphsForCondition(myDataTestControl2,"blockXgroup4a",legendProp=list(color="Group",linetypes="Group",shape="Group"))
 
 ### analysis 4b
 #select by performance and group (better group as control)
@@ -124,7 +124,7 @@ datasetA4b=getReactionTimeDataset(myDataTestControl3)
 myDataTestControl3$cond=paste(myDataTestControl3$group,ifelse(myDataTestControl3$block=="main1","pretest","posttest"),sep="*")
 myDataTestControl3$condLinetype=myDataTestControl3$group
 myDataTestControl3$condColor=myDataTestControl3$group
-generateTableAndGraphsForCondition(myDataTestControl3,"blockXgroup4b",FALSE,TRUE,legendProp=list(color="Group",linetypes="Group",shape="Group"))
+generateTableAndGraphsForCondition(myDataTestControl3,"blockXgroup4b",legendProp=list(color="Group",linetypes="Group",shape="Group"))
 
 ### analysis 5a
 #better learners in control group
@@ -137,7 +137,7 @@ datasetA5a=getReactionTimeDataset(myDataTestControl4)
 myDataTestControl4$cond=paste(myDataTestControl4$group,ifelse(myDataTestControl4$block=="main1","pretest","posttest"),sep="*")
 myDataTestControl4$condLinetype=myDataTestControl4$group
 myDataTestControl4$condColor=myDataTestControl4$group
-generateTableAndGraphsForCondition(myDataTestControl4,"blockXgroup5a",FALSE,TRUE,legendProp=list(color="Group",linetypes="Group",shape="Group"))
+generateTableAndGraphsForCondition(myDataTestControl4,"blockXgroup5a",legendProp=list(color="Group",linetypes="Group",shape="Group"))
 
 #no treatment
 myDataTestControl5=myDataTestControl[which(myDataTestControl$group=="control"),]
@@ -148,7 +148,7 @@ datasetA5b=getReactionTimeDataset(myDataTestControl5)
 myDataTestControl5$cond=paste(myDataTestControl5$group,ifelse(myDataTestControl5$block=="main1","pretest","posttest"),sep="*")
 myDataTestControl5$condLinetype=myDataTestControl5$group
 myDataTestControl5$condColor=myDataTestControl5$group
-generateTableAndGraphsForCondition(myDataTestControl5,"blockXgroup5b",FALSE,TRUE,legendProp=list(color="Group",linetypes="Group",shape="Group"))
+generateTableAndGraphsForCondition(myDataTestControl5,"blockXgroup5b",legendProp=list(color="Group",linetypes="Group",shape="Group"))
 
 
 
