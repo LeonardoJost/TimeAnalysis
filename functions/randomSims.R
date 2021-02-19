@@ -23,8 +23,14 @@ center=function(var,group) {
   return(var-tapply(var,group,mean,na.rm=T)[group])
 }
 #random simulations
+#myDataTest,myDataControl: datasets for data of groups
+#randomSeed: random seed for recreatability
+#numSims: number of runs
+#noTime,time,timeCov: if set to false the according analyses are not performed
 randomSims=function(myDataTest,myDataControl,randomSeed,numSims=1000,noTime=TRUE,time=TRUE,timeCov=TRUE){
+  #set random seed for recreatability
   set.seed(randomSeed)
+  #prepare dataset for saving all important values
   dataOfSims=data.frame(matrix(ncol=8,nrow=numSims))
   names(dataOfSims)=c("randomSample","limit","pNoTime","pTime","coefNoTime","coefTime","pTimeCov","coefTimeCov")
   #generate random simulations
@@ -45,22 +51,28 @@ randomSims=function(myDataTest,myDataControl,randomSeed,numSims=1000,noTime=TRUE
     repeat{ #this is actually only run once but simpler to cancel the rest of the code in this block
       #analysis without time
       if(noTime){
+        #calculate lmer model
         mNoTime=lmer(reactionTime~deg*block*group+deg*correctSide+MRexperience+(deg+block|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+        #break in case of convergence issues
         if(!is.null(mNoTime@optinfo$conv$lme4$messages)){
           print(paste(i,": convergence issues for notime model",sep=" "))
           break
         }
+        #calculate contrast model
         mNoTime2=lmer(reactionTime~deg*block*group+deg*correctSide+MRexperience-block:group+(deg+block|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
+        #break in case of convergence issues
         if(!is.null(mNoTime2@optinfo$conv$lme4$messages)){
           print(paste(i,": convergence issues for notime model",sep=" "))
           break
         }
+        #calculate p-value and coefficient
         pNoTime=anova(mNoTime,mNoTime2)[[8]][2]
         coefNoTime=coef(summary(mNoTime))[9]
-      } else {
+      } else { #save zeros if this type of analysis is not desired
         pNoTime=0
         coefNoTime=0
       }
+      #repeat for all other analyses
       #analysis with time
       if(time){
         mTime=lmer(reactionTime~deg*time*block*group+deg*correctSide+MRexperience+(deg+time|ID)+(1|modelNumber),data=randomGroupData,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
@@ -106,6 +118,7 @@ randomSims=function(myDataTest,myDataControl,randomSeed,numSims=1000,noTime=TRUE
       dataOfSims$coefNoTime[i]=coefNoTime
       dataOfSims$coefTime[i]=coefTime
       dataOfSims$coefTimeCov[i]=coefTimeCov
+      #output
       print(paste(i,":",round(pNoTime,3),",",round(pTimeCov,3),",",round(pTime,3),",",round(coefNoTime),",",round(coefTime),",",round(coefTimeCov),sep=" "))
       #only increase loop variable if values are ok
       i=i+1
@@ -115,7 +128,7 @@ randomSims=function(myDataTest,myDataControl,randomSeed,numSims=1000,noTime=TRUE
   return(dataOfSims)
 }
 
-#plot selected indices
+#plot the block*group interaction of one selected index for the random allocations
 plotSelectedIndex=function(dataOfSims,myDataTest,myDataControl,index,name,legendPos=NULL){
   #get data from index
   randomSample=unlist(dataOfSims$randomSample[index])
@@ -123,18 +136,18 @@ plotSelectedIndex=function(dataOfSims,myDataTest,myDataControl,index,name,legend
   randomSampleTreatment=randomSample[1:limit]
   randomSampleControl=randomSample[(limit+1):length(randomSample)]
   #get data of random participants
-  #get data of random participants
   treatmentGroup=myDataTest[which(myDataTest$ID %in% randomSampleTreatment),]
   treatmentGroup$group="treatment"
   controlGroup=myDataControl[which(myDataControl$ID %in% randomSampleControl),]
   controlGroup$group="control"
   randomGroupData=rbind(treatmentGroup,controlGroup)
+  #set parameters for separation and colors of plot and names
   randomGroupData$cond=paste(randomGroupData$group,ifelse(randomGroupData$block=="main1","pretest","posttest"),sep="*")
   randomGroupData$condLinetype=randomGroupData$group
   randomGroupData$condColor=randomGroupData$group
   #plot graph
   generateTableAndGraphsForCondition(randomGroupData,name,legendProp=list(color="Group",linetypes="Group",shape="Group",pos=legendPos))
-  #print values
+  #print values (possible check of coefficients and p-values)
   print(dataOfSims[index,])
 }
 
@@ -142,9 +155,12 @@ plotSelectedIndex=function(dataOfSims,myDataTest,myDataControl,index,name,legend
 #sample(100000)[1]
 #96235
 #50793
+#random simulations with treatment
 dataOfSims=randomSims(myDataTest,myDataControl,96235)
-#use control group for both
+#random simulations without treatment: use control group for both
 dataOfSimsControl=randomSims(myDataControl,myDataControl,50793)
+#output for simulations without treatment
+#type 1 error rates
 sum(dataOfSimsControl$pNoTime<0.05)
 sum(dataOfSimsControl$pTime<0.05)
 sum(dataOfSimsControl$pTimeCov<0.05)
@@ -153,25 +169,25 @@ sum(dataOfSimsControl$pNoTime>0.05 & dataOfSimsControl$pTime>0.05)
 sum(dataOfSimsControl$pNoTime>0.05 & dataOfSimsControl$pTime<=0.05)
 sum(dataOfSimsControl$pNoTime<=0.05 & dataOfSimsControl$pTime>0.05)
 sum(dataOfSimsControl$pNoTime<=0.05 & dataOfSimsControl$pTime<=0.05)
-#save(dataOfSims,file="functions\\time as fixed Effect\\dataOfSims.RData")
-#group by significance and type of analysis
+#output for simulations with treatment
+#differences between analyses: group by significance and type of analysis
 sum(dataOfSims$pNoTime>0.05 & dataOfSims$pTime>0.05)
 sum(dataOfSims$pNoTime>0.05 & dataOfSims$pTime<=0.05)
 sum(dataOfSims$pNoTime<=0.05 & dataOfSims$pTime>0.05)
 sum(dataOfSims$pNoTime<=0.05 & dataOfSims$pTime<=0.05)
 
-#difference between time as covariate and not
+#difference between time as covariate and only blocks for both simulations
 sum(dataOfSims$pNoTime<=0.05 & dataOfSims$pTimeCov>0.05)
 sum(dataOfSims$pNoTime>0.05 & dataOfSims$pTimeCov<=0.05)
 sum(dataOfSimsControl$pNoTime<=0.05 & dataOfSimsControl$pTimeCov>0.05)
 sum(dataOfSimsControl$pNoTime>0.05 & dataOfSimsControl$pTimeCov<=0.05)
-#coefficients in wrong direction
+#check for significant coefficients in wrong direction
 dataOfSims[which(dataOfSims$coefNoTime>0),]
 dataOfSims[which(dataOfSims$coefTime>0),]
 dataOfSims[which(dataOfSims$coefTimeCov>0),]
 
-#plot dataset for maximum p-values
-#maximum p value of Time analysis while no time significant
+#plot dataset for maximal p-values for treatment simulations
+#maximum p value of time analysis while no time significant
 maxPTime=which(dataOfSims$pTime==max(dataOfSims$pTime[which(dataOfSims$pNoTime<0.05)]))
 plotSelectedIndex(dataOfSims,myDataTest,myDataControl,maxPTime,"randomTreatmentMaxPTime","none")
 
@@ -183,7 +199,7 @@ plotSelectedIndex(dataOfSims,myDataTest,myDataControl,maxPNoTime,"randomTreatmen
 maxPBoth=which(dataOfSims$pNoTime+dataOfSims$pTime==max(dataOfSims$pNoTime+dataOfSims$pTime))
 plotSelectedIndex(dataOfSims,myDataTest,myDataControl,maxPBoth,"randomTreatmentMaxPBoth")
 
-#plot data for no treatment condition
+#plot data for minimal p-values for no treatment condition
 #minimum p value of time analysis while no time not significant
 minPTimeControl=which(dataOfSimsControl$pTime==min(dataOfSimsControl$pTime[which(dataOfSimsControl$pNoTime>=0.05)]))
 plotSelectedIndex(dataOfSimsControl,myDataControl,myDataControl,minPTimeControl,"randomControlMinPTime","none")
@@ -192,6 +208,7 @@ plotSelectedIndex(dataOfSimsControl,myDataControl,myDataControl,minPTimeControl,
 minPNoTimeControl=which(dataOfSimsControl$pNoTime==min(dataOfSimsControl$pNoTime[which(dataOfSimsControl$pTime>=0.05)]))
 plotSelectedIndex(dataOfSimsControl,myDataControl,myDataControl,minPNoTimeControl,"randomControlMinPNoTime")
 
+#combine images into one for each simulation type
 combineImages(c("figs/MR/Timed/randomTreatmentMaxPTimeLinePlotByCondTime.tiff",
                 "figs/MR/Timed/randomTreatmentMaxPNoTimeLinePlotByCondTime.tiff",
                 "figs/MR/Timed/randomTreatmentMaxPBothLinePlotByCondTime.tiff"),

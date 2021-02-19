@@ -48,12 +48,13 @@ mTimeTimeXBlock=lmer(reactionTime~time*block+deg*time+deg*correctSide+MRexperien
 mTimeTimeXBlock.summary=modelSummary(mTimeTimeXBlock,0)
 
 
-###center time
+#use time as covariate without time manipulation
+#function for centering
 center=function(var,group) {
   return(var-tapply(var,group,mean,na.rm=T)[group])
 }
 dataset.rt$time2=center(dataset.rt$time,dataset.rt$block)
-
+#analysis
 mBaseTimeCovariate=lmer(reactionTime~deg*block+time2+deg*correctSide+MRexperience+(deg+block|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))
 summary(mBaseTimeCovariate)
 mBaseTimeCovariate2=lmer(reactionTime~deg*block-block+time2+deg*correctSide+MRexperience+(deg+block|ID)+(1|modelNumber),data=dataset.rt,REML=FALSE,control = lmerControl(optimizer = "optimx",optCtrl = list(method = "bobyqa")))

@@ -16,10 +16,9 @@
 
 source("functions/helpers.R")
 
-#generate table and graphs for cond from MRData dataset
+#generate table and graphs from MRData dataset (table part is removed because unnecessary here)
+#coloring according to entries in dataset
 generateTableAndGraphsForCondition=function(MRData,conditionString,legendProp=list(),ylab="Reaction time(ms)"){
-  #calculate means by angle and interesting condition (important for plotting accuracy)
-  #careful with outliers
   library(plyr)
   if(is.null(MRData$cond2))
     MRData$cond2=1
@@ -32,7 +31,7 @@ generateTableAndGraphsForCondition=function(MRData,conditionString,legendProp=li
   generateLineGraphsByTime(MRData[which(MRData$typeOutlier=="hit"),],paste("MR/Timed/",conditionString,sep=""),legendProp,ylab)
 }
 
-#generate lins graphs by time
+#generate line graphs by time
 generateLineGraphsByTime=function(dataset,title,legendProp=list(),ylab="Reaction time(ms)") {
   if(is.null(legendProp$pos))
     legendProp$pos=c(0.8,0.9)
@@ -49,21 +48,27 @@ generateLineGraphsByTime=function(dataset,title,legendProp=list(),ylab="Reaction
 }
 
 #combine multiple images into one
+#imagesList should contain fileNames of rows*columns files
 combineImages=function(imagesList,rows,columns,outputFile){
   library(magick)
   initImage=image_read(imagesList[1])
+  #each row contains columns images
   imageRows=rep(initImage,columns)
   imageColumns=rep(initImage,rows)
+  #combine images in rows and columns
   counter=1
   for(i in 1:rows){
     for(j in 1:columns){
       imageRows[j]=image_read(imagesList[counter])
       counter=counter+1
     }
+    #append horizontally
     imageRow=image_append(imageRows)
     imageColumns[i]=imageRow
   }
+  #append vertically
   image=image_append(imageColumns,stack=TRUE)
+  #save
   image_write(image, path = outputFile)
   gc()
 }
