@@ -20,8 +20,6 @@ source("functions/helpers.R")
 #coloring according to entries in dataset
 generateTableAndGraphsForCondition=function(MRData,conditionString,legendProp=list(),ylab="Reaction time(ms)"){
   library(plyr)
-  if(is.null(MRData$cond2))
-    MRData$cond2=1
   if(is.null(MRData$condLinetype))
     MRData$condLinetype=MRData$cond
   if(is.null(MRData$condShape))
